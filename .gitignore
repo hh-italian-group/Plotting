@@ -1,0 +1,6 @@
+# Build
+/build
+
+# Editor temp and project files
+*.swp
+/CMakeLists.txt.user
