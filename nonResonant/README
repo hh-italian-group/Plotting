@@ -1,0 +1,52 @@
+To make the 2D limit plots you do
+
+ python plot_2D.py -n 12 --LHC 13 --ch 1 --type 1
+
+Where:
+
+-n 12 
+  is the number of clusters
+  (you should always use 12)
+
+—LHC 13
+  Is the CM energy (It is going to be used for the cross section normalization)
+
+—ch is the channel, that is:
+
+1 = llnnbb
+2 = aabb
+3 = tatabb
+4 = bbbb
+
+--type 
+
+1: in clusters
+2: point by point, 1507 points
+
+================================================
+The experimental input for the plots are in the folder:
+
+1: /Resources/Limits/run2/nonRes-in-benchmarks
+2: /Resources/Limits/run2/nonRes-in-1507-points
+
+The limits there should be in fb. 
+
+
+===============================================================
+For type 1:
+
+The approximations I do are:
+- When limits in benchmarks in V3 are available, I extend them to clusters
+- When limits in benchmarks in V1 are available, I take the worst one and extend it to all the points
+- If not, I extend the SM limit to all the points
+==============================================================
+
+Those may not be so bad in some specific cases, we can learn somethings looking at them (with a careful eye!!!). 
+Be conservative, and always assume that we are always being optimistic.
+
+
+
+
+
+
+
