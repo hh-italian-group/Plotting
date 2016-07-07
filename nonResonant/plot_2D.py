@@ -26,6 +26,9 @@ if (chan==1) : outfolder = "llnnbb"
 elif (chan==2) : outfolder = "aabb"
 elif (chan==3) : outfolder = "tatabb"
 elif (chan==4) : outfolder = "bbbb"
+# mkdir
+os.system('mkdir '+outfolder)
+
 
 print "Employ %s clusters" % number
 print "pp @ %s TeV" % CM
@@ -135,7 +138,7 @@ for line in lines:
     #for lim in range(0,7) : limits[counter][lim] = float(tokens[lim])
     counter+=1
 f.close()
-for ii in range(0,nclu) : print str(ii)+ " limit up to HH is: " + str((limitsExp[ii]/BR))+" (fb), and up to the final state  "+ str(round_sig(limitsExp[ii], 3))+"(fb)"
+#for ii in range(0,nclu) : print str(ii)+ " limit up to HH is: " + str((limitsExp[ii]/BR))+" (fb), and up to the final state  "+ str(round_sig(limitsExp[ii], 3))+"(fb)"
 ###################################
 ## make the 5D functions in root
 ##################################
@@ -877,12 +880,24 @@ Histoc2cgExclu = [None]*nclu
 Histocgc2g05 = [None]*nclu 
 Histocgc2g05Exclu = [None]*nclu 
 #
+spread = [None]*nclu  
+#
 mc = [221, 1, 208, 205, 99, 226, 8, 211, 209, 28, 30, 221, 38, 40, 41, 44, 45, 46, 48]
 mt= [34,34,22,20,34, 34,23,20,22,23,23,23]
 mtexclu= [28,28,26,24,28, 28,32,24,26,32,32,32]
 tick=[0.5,1,1.5,2,2.5]
 ticks= np.array(tick)
 for ii in range(0,nclu):
+    spread[ii] = TH1D("","", 500,-0.5,12.5)
+    spread[ii].GetYaxis().SetTitle("#sigma pp #to HH (fb)")
+    spread[ii].GetXaxis().SetTitle("Shape Benchmark")
+    spread[ii].SetLineColor(mc[ii])
+    spread[ii].SetMarkerColor(1)
+    spread[ii].SetMarkerStyle(20)
+    spread[ii].SetMarkerSize(0.5)
+    spread[ii].SetMaximum(1000000)
+    spread[ii].SetMinimum(100)
+    #
     Histoc2kt[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
     Histoc2kt[ii].GetYaxis().SetTitle("#kappa_{t}")
     Histoc2kt[ii].GetXaxis().SetTitle("c_{2}")
@@ -1220,6 +1235,7 @@ excluded.SetMarkerColor(1)
 excluded.SetMarkerStyle(24)
 excluded.SetMarkerSize(2.0)
 #  
+#
 ################################
 ##
 ## read the translation
@@ -1279,6 +1295,8 @@ for point in range(0,1507):
     for ii in range(0,nclu):
         #print clusters[ii]
         if point in clusters[ii]: 
+           ###
+           spread[ii].Fill(ii,limitsExp[ii] )
            #print "it is in cluster:  " +str(ii+1)
            if(L[point]==15.0 and cg[point] ==0 and c2g[point] ==0 ) : 
                if ( (ff15d15.Eval(c2[point],y[point]))*xs*BR > limitsExp[ii]  ) : Histoc2kt15Exclu[ii].Fill(c2[point],y[point])
@@ -1390,7 +1408,7 @@ leg3.AddEntry(ff15d, "Th. cross section", "L")
 if(type==1) : 
   if (chan==4 or chan==3) : leg.AddEntry(Histoc2kt[0], str(round_sig(limitsExp[0]/1000, 3)), "P")
   else : leg.AddEntry(Histoc2kt[0], str(round_sig(limitsExp[0], 3)), "P")
-elif(type==2) : leg.AddEntry(Histoc2kt[0], "du", "P")
+elif(type==2) : leg.AddEntry(Histoc2kt[0], "SB "+str(1), "P")
 Histoc2ktExclu[0].Draw("same")
 ff15d.Draw("same")
 for ii in range(1,nclu): 
@@ -1398,7 +1416,7 @@ for ii in range(1,nclu):
    if(type==1) : 
       if (chan==4 or chan==3) : leg.AddEntry(Histoc2kt[ii],str(round_sig(limitsExp[ii]/1000, 3)),"P") # lege20[ii], "P")
       else : leg.AddEntry(Histoc2kt[ii],str(round_sig(limitsExp[ii], 3)),"P") 
-   elif(type==2) : leg.AddEntry(Histoc2kt[ii], "du", "P")
+   elif(type==2) : leg.AddEntry(Histoc2kt[ii], "SB "+str(ii+1), "P")
    Histoc2ktExclu[ii].Draw("same")
 #text.DrawLatex(-4.2,3.55,"#kappa_{#lambda} = 1 ; c_{g} = c_{2g} = 0")
 #text2.DrawLatex(-4.2,3.55,"#sigma(pp #rightarrow HH #rightarrow #gamma#gamma b#bar{b})")
@@ -2093,5 +2111,26 @@ if (chan==5) :
 text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
 c2p4.Print(outfolder+"/c2_kt_kl2p4.png")
 c2p4.Close()
+########################
+if(type==2) : 
+  cspread=TCanvas()
+  spread[0].Draw()
+  spread[0].Draw("same")
+  for ii in range(1,nclu): 
+      spread[ii].Draw("same")
+      spread[ii].Draw("same")
+  #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
+  text3.DrawLatex(-4.5,3.55,channel)
+  text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
+  text.DrawLatex(0,1000,", to internal knowlegde")
+  text.DrawLatex(0,200,"to be tunned, it should show the stpread of limits")
+  #lineHc2kt.Draw("same")
+  #lineTc2kt.Draw("same")
+  #leg.Draw("same")
+  #leg2.Draw("same")
+  #leg3.Draw("same")
+  cspread.SetLogy(1)
+  cspread.Print(outfolder+"/spread.png")
+  cspread.Close()
 
 

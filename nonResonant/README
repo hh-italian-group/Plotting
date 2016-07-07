@@ -31,12 +31,18 @@ The experimental input for the plots are in the folder:
 
 The limits there should be in fb. 
 
-
 ===============================================================
 For type 1:
 
 The approximations I do are:
 - When limits in benchmarks in V3 are available, I extend them to clusters
+- When limits in benchmarks in V1 are available, I take the worst one and extend it to all the points
+- If not, I extend the SM limit to all the points
+==============================================================
+For type 2:
+
+The approximations I do are:
+
 - When limits in benchmarks in V1 are available, I take the worst one and extend it to all the points
 - If not, I extend the SM limit to all the points
 ==============================================================
