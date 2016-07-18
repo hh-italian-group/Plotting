@@ -4,7 +4,7 @@ import os, sys, time,math, unittest
 import subprocess
 import numpy as np
 import ROOT
-from ROOT import TLatex,TPad,TList,TH1,TH1F,TH2F,TH1D,TH2D,TFile,TTree,TCanvas,TLegend,SetOwnership,gDirectory,TObject,gStyle,gROOT,TLorentzVector,TGraph,TMultiGraph,TColor,TAttMarker,TLine,TDatime,TGaxis,TF1,THStack,TAxis,TStyle,TPaveText,TAttFill,TF2,gPad
+from ROOT import TLatex,TPad,TList,TH1,TH1F,TH2F,TH1D,TH2D,TFile,TTree,TCanvas,TLegend,SetOwnership,gDirectory,TObject,gStyle,gROOT,TLorentzVector,TGraph,TMultiGraph,TColor,TAttMarker,TLine,TDatime,TGaxis,TF1,THStack,TAxis,TStyle,TPaveText,TAttFill,TF2,gPad,TGaxis
 from array import array
 pow = ROOT.TMath.Power
 import bisect
@@ -35,7 +35,7 @@ print "pp @ %s TeV" % CM
 print "in the channel %s " % chan
 ###############################
 if(type==1) : nclu =12
-elif(type==2) : nclu =1508
+elif(type==2) : nclu =1507
 ###############################
 # to round numbers
 from math import log10, floor
@@ -47,9 +47,9 @@ defaultStyle.SetOptStat(0)
 defaultStyle.SetPadBorderMode(1)
 #defaultStyle.SetPadBorderSize(1)
 defaultStyle.SetPadColor(0)
-defaultStyle.SetPadTopMargin(0.08)
-defaultStyle.SetPadBottomMargin(0.15)
-defaultStyle.SetPadLeftMargin(0.15)
+defaultStyle.SetPadTopMargin(0.1)
+defaultStyle.SetPadBottomMargin(0.14)
+defaultStyle.SetPadLeftMargin(0.12)
 defaultStyle.SetPadRightMargin(2)
 #/////// canvas /////////
 defaultStyle.SetCanvasBorderMode(0)
@@ -61,37 +61,64 @@ defaultStyle.SetFrameFillColor(0)
 defaultStyle.SetFrameLineColor(1)
 #/////// various ////////
 defaultStyle.SetTitleFillColor(0)
-defaultStyle.SetTitleX(0.2)
-defaultStyle.SetTitleSize(0.05, "XYZ")    
+#defaultStyle.SetTitleX(0.2)
+defaultStyle.SetTitleSize(0.06, "XYZ")    
 defaultStyle.SetLabelColor(1, "XYZ")
-defaultStyle.SetLabelSize(0.05, "XYZ")    
+defaultStyle.SetLabelSize(0.04, "XYZ")    
 # For the axis:
 #defaultStyle.SetStripDecimals(kTRUE)
 defaultStyle.SetTickLength(0.03, "XYZ")
+defaultStyle.SetLabelFont(62) 
 defaultStyle.SetNdivisions(11, "XZ")
 defaultStyle.SetNdivisions(12, "Y")
 defaultStyle.cd()
-
 ###############################
-leg = TLegend(0.48,0.68,0.92,0.91)
-if (chan==4 or chan==3) : leg.SetHeader("Obs. 95% CL upper limits (pb)")
-else : leg.SetHeader("Obs. 95% CL upper limits (fb)")
+warning = "CMS preliminary"
+if (chan==1) :
+    #    if(type==1) : warning = "WW(ll)bb = warning, limits on benchmarks!"
+    #elif(type==2) : warning = "the worst limits on benchmarks applied to all points!"
+    channel ="#sigma(pp #rightarrow HH #rightarrow ll#nu#nu b#bar{b})"
+    lumi="L = X.x fb^{-1} (13 TeV)"
+elif (chan==2) :
+    #    if(type==1) : warning = "the worst limit of v1 extrapolated to all points"
+    #elif(type==2) : warning = "the worst limits on benchmarks applied to all points!"
+    channel ="#sigma(pp #rightarrow HH #rightarrow #gamma#gamma b#bar{b})"
+    lumi="L = X.x fb^{-1} (13 TeV)"
+elif (chan==3) :
+    lumi="L = 2.6 fb^{-1} (13 TeV)"
+    channel ="#sigma(pp #rightarrow HH #rightarrow #tau#tau b#bar{b})"
+elif (chan==4) :
+    #    if(type==1) : warning = "limits on SM extrapolated to all!"
+    #elif(type==2) : warning = "the worst limits on benchmarks applied to all points!"
+    channel ="#sigma(pp #rightarrow HH #rightarrow b#bar{b} b#bar{b})"
+    lumi="L = X.x fb^{-1} (13 TeV)"
+###############################
+# markers
+if(type==2) : leg = TLegend(0.52,0.65,0.96,0.9)
+elif (type==1) : leg = TLegend(0.48,0.68,0.92,0.91)
+#
+if(type==1) : 
+  if (chan==4 or chan==3) : leg.SetHeader("Obs. 95% CL upper limits (pb)")
+  else : leg.SetHeader("Obs. 95% CL upper limits (fb)")
+if(type ==2) : leg.SetHeader("Cluster")
 leg.SetNColumns(4)
 #leg.SetFillColor(0);
 leg.SetFillStyle(0);
 leg.SetBorderSize(0);
-leg.SetTextSize(0.04);
-#
-leg2 = TLegend(0.17,0.71,0.46,0.91)
+leg.SetTextSize(0.03);
+# allowed/excluded
+if(type==2) :  leg2 = TLegend(0.15,0.73,0.47,0.83)
+elif(type==1) :  leg2 = TLegend(0.17,0.71,0.46,0.91)
 leg2.SetNColumns(2)
 leg2.SetFillStyle(0);
 leg2.SetBorderSize(0);
-leg2.SetTextSize(0.038);
-#
-leg3 = TLegend(0.15,0.65,0.46,0.85)
+leg2.SetTextSize(0.03);
+# theory
+if(type==2) : leg3 = TLegend(0.15,0.68,0.45,0.78)
+elif(type==1) : leg3 = TLegend(0.15,0.65,0.46,0.85)
 leg3.SetFillStyle(0);
 leg3.SetBorderSize(0);
-leg3.SetTextSize(0.04);
+leg3.SetTextSize(0.03);
 ###############################
 ## 
 if (chan==1) : BR = 0.0122886 # llnnbb
@@ -205,7 +232,7 @@ elif (chan==2) :
     contou = [0.1/(xs*BR),0.2/(xs*BR),5/(xs*BR),10/(xs*BR),20/(xs*BR),20/(xs*BR),50/(xs*BR),100/(xs*BR),300/(xs*BR)]
     contours= np.array(contou)
 elif (chan==3) : 
-    contou = [5/(xs*BR),10/(xs*BR),20/(xs*BR),50/(xs*BR),100/(xs*BR),300/(xs*BR),500/(xs*BR),1000/(xs*BR),1500/(xs*BR)]
+    contou = [2/(xs*BR),5/(xs*BR),10/(xs*BR),50/(xs*BR),100/(xs*BR),300/(xs*BR),500/(xs*BR),1000/(xs*BR),1500/(xs*BR)]
     contours= np.array(contou)
 elif (chan==4) : 
     contou = [50/(xs*BR),100/(xs*BR),200/(xs*BR),500/(xs*BR),1000/(xs*BR),3000/(xs*BR),5000/(xs*BR),10000/(xs*BR),15000/(xs*BR)]
@@ -279,7 +306,7 @@ ff15dm15.SetLineStyle(8)
 ##########################
 ## (x,y) = (c2,kt) , kl =15
 ##########################
-ff15d15 = TF2('fc2kt',fc2kt,-4.3,3,0.5,2.5,19)
+ff15d15 = TF2('fc2kt',fc2kt,-4.3,5.5,0.5,2.5,19)
 #ff15d.SetParameters(parameters)
 ff15d15.SetParameter(0, float(A[0]))
 ff15d15.SetParameter(1, float(A[1]))
@@ -496,7 +523,7 @@ ff65d.SetLineColor(16)
 ff65d.SetLineStyle(8)
 ff65d.SetContour(9,contours) 
 ff65d.SetTitle("")
-ff45d.SetMinimum(0)
+ff65d.SetMinimum(0)
 ##########################
 ## (x,y) = (c2,kt) , kl =-12.5
 ##########################
@@ -528,7 +555,7 @@ ff15dm12p5.SetLineStyle(8)
 ##########################
 ## (x,y) = (c2,kt) , kl =12.5
 ##########################
-ff15d12p5 = TF2('fc2kt',fc2kt,-4.3,3,0.5,2.5,19)
+ff15d12p5 = TF2('fc2kt',fc2kt,-4.3,5.5,0.5,2.5,19)
 #ff15d.SetParameters(parameters)
 ff15d12p5.SetParameter(0, float(A[0]))
 ff15d12p5.SetParameter(1, float(A[1]))
@@ -584,7 +611,7 @@ ff15dm10p0.SetLineStyle(8)
 ##########################
 ## (x,y) = (c2,kt) , kl =10.0
 ##########################
-ff15d10p0 = TF2('fc2kt',fc2kt,-4.3,3,0.5,2.5,19)
+ff15d10p0 = TF2('fc2kt',fc2kt,-4.3,5.5,0.5,2.5,19)
 #ff15d.SetParameters(parameters)
 ff15d10p0.SetParameter(0, float(A[0]))
 ff15d10p0.SetParameter(1, float(A[1]))
@@ -640,7 +667,7 @@ ff15dm7p5.SetLineStyle(8)
 ##########################
 ## (x,y) = (c2,kt) , kl =7.5
 ##########################
-ff15d7p5 = TF2('fc2kt',fc2kt,-4.3,3,0.5,2.5,19)
+ff15d7p5 = TF2('fc2kt',fc2kt,-4.3,5.5,0.5,2.5,19)
 #ff15d.SetParameters(parameters)
 ff15d7p5.SetParameter(0, float(A[0]))
 ff15d7p5.SetParameter(1, float(A[1]))
@@ -696,7 +723,7 @@ ff15dm5p0.SetLineStyle(8)
 ##########################
 ## (x,y) = (c2,kt) , kl =5.0
 ##########################
-ff15d5p0 = TF2('fc2kt',fc2kt,-4.3,3,0.5,2.5,19)
+ff15d5p0 = TF2('fc2kt',fc2kt,-4.3,5.5,0.5,2.5,19)
 #ff15d.SetParameters(parameters)
 ff15d5p0.SetParameter(0, float(A[0]))
 ff15d5p0.SetParameter(1, float(A[1]))
@@ -752,7 +779,7 @@ ff15dm3p5.SetLineStyle(8)
 ##########################
 ## (x,y) = (c2,kt) , kl =3.5
 ##########################
-ff15d3p5 = TF2('fc2kt',fc2kt,-4.3,3,0.5,2.5,19)
+ff15d3p5 = TF2('fc2kt',fc2kt,-4.3,5.5,0.5,2.5,19)
 #ff15d.SetParameters(parameters)
 ff15d3p5.SetParameter(0, float(A[0]))
 ff15d3p5.SetParameter(1, float(A[1]))
@@ -808,7 +835,7 @@ ff15dm2p4.SetLineStyle(8)
 ##########################
 ## (x,y) = (c2,kt) , kl =2.4
 ##########################
-ff15d2p4 = TF2('fc2kt',fc2kt,-4.3,3,0.5,2.5,19)
+ff15d2p4 = TF2('fc2kt',fc2kt,-5,5.5,0.5,2.5,19)
 #ff15d.SetParameters(parameters)
 ff15d2p4.SetParameter(0, float(A[0]))
 ff15d2p4.SetParameter(1, float(A[1]))
@@ -878,28 +905,17 @@ Histocgc2gExclu = [None]*nclu
 Histoc2cg = [None]*nclu 
 Histoc2cgExclu = [None]*nclu 
 Histocgc2g05 = [None]*nclu 
-Histocgc2g05Exclu = [None]*nclu 
+Histocgc2g05Exclu = [None]*nclu  
 #
-spread = [None]*nclu  
-#
-mc = [221, 1, 208, 205, 99, 226, 8, 211, 209, 28, 30, 221, 38, 40, 41, 44, 45, 46, 48]
+mc = [221, 1, 208, 205, 99, 8, 209, 209, 3, 28, 30, 221, 38, 40, 41, 44, 45, 46, 48]
 mt= [34,34,22,20,34, 34,23,20,22,23,23,23]
 mtexclu= [28,28,26,24,28, 28,32,24,26,32,32,32]
 tick=[0.5,1,1.5,2,2.5]
 ticks= np.array(tick)
 for ii in range(0,nclu):
-    spread[ii] = TH1D("","", 500,-0.5,12.5)
-    spread[ii].GetYaxis().SetTitle("#sigma pp #to HH (fb)")
-    spread[ii].GetXaxis().SetTitle("Shape Benchmark")
-    spread[ii].SetLineColor(mc[ii])
-    spread[ii].SetMarkerColor(1)
-    spread[ii].SetMarkerStyle(20)
-    spread[ii].SetMarkerSize(0.5)
-    spread[ii].SetMaximum(1000000)
-    spread[ii].SetMinimum(100)
     #
     Histoc2kt[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2kt[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt[ii].GetYaxis().SetTitle(" ")
     Histoc2kt[ii].GetXaxis().SetTitle("c_{2}")
     #    Histoc2kt[ii].GetXaxis().SetLabel(ticks)
     Histoc2kt[ii].SetLineColor(mc[ii])
@@ -908,7 +924,7 @@ for ii in range(0,nclu):
     Histoc2kt[ii].SetMarkerSize(2.0)
     #    
     Histoc2ktExclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2ktExclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktExclu[ii].GetYaxis().SetTitle(" ")
     Histoc2ktExclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktExclu[ii].SetLineColor(mc[ii])
     Histoc2ktExclu[ii].SetMarkerColor(mc[ii])
@@ -916,7 +932,7 @@ for ii in range(0,nclu):
     Histoc2ktExclu[ii].SetMarkerSize(2.0)
     # kl = -15
     Histoc2ktm15[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2ktm15[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm15[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm15[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm15[ii].SetLineColor(mc[ii])
     Histoc2ktm15[ii].SetMarkerColor(mc[ii])
@@ -924,15 +940,15 @@ for ii in range(0,nclu):
     Histoc2ktm15[ii].SetMarkerSize(2.0)
     #    
     Histoc2ktm15Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2ktm15Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm15Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm15Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm15Exclu[ii].SetLineColor(mc[ii])
     Histoc2ktm15Exclu[ii].SetMarkerColor(mc[ii])
     Histoc2ktm15Exclu[ii].SetMarkerStyle(mtexclu[ii])
     Histoc2ktm15Exclu[ii].SetMarkerSize(2.0)
     # kl = 15
-    Histoc2kt15[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2kt15[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt15[ii] = TH2D("","", 500,-3.8,5.5,500,0.3,3.8 )
+    Histoc2kt15[ii].GetYaxis().SetTitle(" ")
     Histoc2kt15[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt15[ii].SetLineColor(mc[ii])
     Histoc2kt15[ii].SetMarkerColor(mc[ii])
@@ -940,23 +956,23 @@ for ii in range(0,nclu):
     Histoc2kt15[ii].SetMarkerSize(2.0)
     #    
     Histoc2kt15Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2kt15Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt15Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2kt15Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt15Exclu[ii].SetLineColor(mc[ii])
     Histoc2kt15Exclu[ii].SetMarkerColor(mc[ii])
     Histoc2kt15Exclu[ii].SetMarkerStyle(mtexclu[ii])
     Histoc2kt15Exclu[ii].SetMarkerSize(2.0)
     #
-    Histoklkt[ii] = TH2D("","", 500,-21,16.5,500,0.3,3.8  )
-    Histoklkt[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoklkt[ii] = TH2D("","", 500,-21,16.5,800,0.3,3.8  )
+    Histoklkt[ii].GetYaxis().SetTitle(" ")
     Histoklkt[ii].GetXaxis().SetTitle("#kappa_{#lambda}")
     Histoklkt[ii].SetLineColor(mc[ii])
     Histoklkt[ii].SetMarkerColor(mc[ii])
     Histoklkt[ii].SetMarkerStyle(mt[ii])
     Histoklkt[ii].SetMarkerSize(2.0)
     #    
-    HistoklktExclu[ii] = TH2D("","", 500,-24,16.5,500,0.0,3.8 )
-    HistoklktExclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    HistoklktExclu[ii] = TH2D("","", 500,-24,16.5,800,0.0,3.8 )
+    HistoklktExclu[ii].GetYaxis().SetTitle(" ")
     HistoklktExclu[ii].GetXaxis().SetTitle("#kappa_{#lambda}")
     HistoklktExclu[ii].SetLineColor(mc[ii])
     HistoklktExclu[ii].SetMarkerColor(mc[ii])
@@ -964,7 +980,7 @@ for ii in range(0,nclu):
     HistoklktExclu[ii].SetMarkerSize(2.0)
     #
     Histoklcg[ii] = TH2D("","", 500,-20,16.5,500,-1.1,2.2  )
-    Histoklcg[ii].GetYaxis().SetTitle("c_{g} (= - c_{2g} )")
+    Histoklcg[ii].GetYaxis().SetTitle(" ")
     Histoklcg[ii].GetXaxis().SetTitle("#kappa_{#lambda}")
     Histoklcg[ii].SetLineColor(mc[ii])
     Histoklcg[ii].SetMarkerColor(mc[ii])
@@ -972,7 +988,7 @@ for ii in range(0,nclu):
     Histoklcg[ii].SetMarkerSize(2.0)
     #    
     HistoklcgExclu[ii] = TH2D("","", 500,-20,16.5,500,-1.1,1.5 )
-    HistoklcgExclu[ii].GetYaxis().SetTitle("c_{g}")
+    HistoklcgExclu[ii].GetYaxis().SetTitle(" ")
     HistoklcgExclu[ii].GetXaxis().SetTitle("#kappa_{#lambda}")
     HistoklcgExclu[ii].SetLineColor(mc[ii])
     HistoklcgExclu[ii].SetMarkerColor(mc[ii])
@@ -980,7 +996,7 @@ for ii in range(0,nclu):
     HistoklcgExclu[ii].SetMarkerSize(2.0)
     #
     Histocgc2g[ii] = TH2D("","", 500,-1.4,1.1,500,-1.1,2.2  )
-    Histocgc2g[ii].GetYaxis().SetTitle("c_{2g}")
+    Histocgc2g[ii].GetYaxis().SetTitle("")
     Histocgc2g[ii].GetXaxis().SetTitle("c_{g}")
     Histocgc2g[ii].SetLineColor(mc[ii])
     Histocgc2g[ii].SetMarkerColor(mc[ii])
@@ -988,7 +1004,7 @@ for ii in range(0,nclu):
     Histocgc2g[ii].SetMarkerSize(2.0)
     #    
     Histocgc2gExclu[ii] = TH2D("","", 500,-20,16.5,500,-1.1,1.5 )
-    Histocgc2gExclu[ii].GetYaxis().SetTitle("c_{2g}")
+    Histocgc2gExclu[ii].GetYaxis().SetTitle("")
     Histocgc2gExclu[ii].GetXaxis().SetTitle("c_{g}")
     Histocgc2gExclu[ii].SetLineColor(mc[ii])
     Histocgc2gExclu[ii].SetMarkerColor(mc[ii])
@@ -996,7 +1012,7 @@ for ii in range(0,nclu):
     Histocgc2gExclu[ii].SetMarkerSize(2.0)
     #
     Histoc2cg[ii] = TH2D("","", 500,-3.5,5.6,500,-1.2,2.2  )
-    Histoc2cg[ii].GetYaxis().SetTitle("c_{g}")
+    Histoc2cg[ii].GetYaxis().SetTitle(" ")
     Histoc2cg[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2cg[ii].SetLineColor(mc[ii])
     Histoc2cg[ii].SetMarkerColor(mc[ii])
@@ -1027,8 +1043,8 @@ for ii in range(0,nclu):
     Histocgc2g05Exclu[ii].SetMarkerStyle(mtexclu[ii])
     Histocgc2g05Exclu[ii].SetMarkerSize(2.0)
     # kl = 12p5
-    Histoc2kt12p5[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2kt12p5[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt12p5[ii] = TH2D("","", 500,-3.8,5.5,500,0.3,3.8 )
+    Histoc2kt12p5[ii].GetYaxis().SetTitle(" ")
     Histoc2kt12p5[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt12p5[ii].SetLineColor(mc[ii])
     Histoc2kt12p5[ii].SetMarkerColor(mc[ii])
@@ -1036,7 +1052,7 @@ for ii in range(0,nclu):
     Histoc2kt12p5[ii].SetMarkerSize(2.0)
     #    
     Histoc2kt12p5Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2kt12p5Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt12p5Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2kt12p5Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt12p5Exclu[ii].SetLineColor(mc[ii])
     Histoc2kt12p5Exclu[ii].SetMarkerColor(mc[ii])
@@ -1044,7 +1060,7 @@ for ii in range(0,nclu):
     Histoc2kt12p5Exclu[ii].SetMarkerSize(2.0)
     # kl = -12p5
     Histoc2ktm12p5[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2ktm12p5[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm12p5[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm12p5[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm12p5[ii].SetLineColor(mc[ii])
     Histoc2ktm12p5[ii].SetMarkerColor(mc[ii])
@@ -1052,15 +1068,15 @@ for ii in range(0,nclu):
     Histoc2ktm12p5[ii].SetMarkerSize(2.0)
     #    
     Histoc2ktm12p5Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2ktm12p5Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm12p5Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm12p5Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm12p5Exclu[ii].SetLineColor(mc[ii])
     Histoc2ktm12p5Exclu[ii].SetMarkerColor(mc[ii])
     Histoc2ktm12p5Exclu[ii].SetMarkerStyle(mtexclu[ii])
     Histoc2ktm12p5Exclu[ii].SetMarkerSize(2.0)
     # kl = 10p0
-    Histoc2kt10p0[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2kt10p0[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt10p0[ii] = TH2D("","",500,-3.8,5.5,500,0.3,3.8 )
+    Histoc2kt10p0[ii].GetYaxis().SetTitle(" ")
     Histoc2kt10p0[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt10p0[ii].SetLineColor(mc[ii])
     Histoc2kt10p0[ii].SetMarkerColor(mc[ii])
@@ -1068,7 +1084,7 @@ for ii in range(0,nclu):
     Histoc2kt10p0[ii].SetMarkerSize(2.0)
     #    
     Histoc2kt10p0Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2kt10p0Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt10p0Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2kt10p0Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt10p0Exclu[ii].SetLineColor(mc[ii])
     Histoc2kt10p0Exclu[ii].SetMarkerColor(mc[ii])
@@ -1076,7 +1092,7 @@ for ii in range(0,nclu):
     Histoc2kt10p0Exclu[ii].SetMarkerSize(2.0)
     # kl = -10p0
     Histoc2ktm10p0[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2ktm10p0[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm10p0[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm10p0[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm10p0[ii].SetLineColor(mc[ii])
     Histoc2ktm10p0[ii].SetMarkerColor(mc[ii])
@@ -1084,23 +1100,23 @@ for ii in range(0,nclu):
     Histoc2ktm10p0[ii].SetMarkerSize(2.0)
     #    
     Histoc2ktm10p0Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2ktm10p0Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm10p0Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm10p0Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm10p0Exclu[ii].SetLineColor(mc[ii])
     Histoc2ktm10p0Exclu[ii].SetMarkerColor(mc[ii])
     Histoc2ktm10p0Exclu[ii].SetMarkerStyle(mtexclu[ii])
     Histoc2ktm10p0Exclu[ii].SetMarkerSize(2.0)
     # kl = 7p5
-    Histoc2kt7p5[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2kt7p5[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt7p5[ii] = TH2D("","", 500,-3.8,5.5,500,0.3,3.8 )
+    Histoc2kt7p5[ii].GetYaxis().SetTitle(" ")
     Histoc2kt7p5[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt7p5[ii].SetLineColor(mc[ii])
     Histoc2kt7p5[ii].SetMarkerColor(mc[ii])
     Histoc2kt7p5[ii].SetMarkerStyle(mt[ii])
     Histoc2kt7p5[ii].SetMarkerSize(2.0)
     #    
-    Histoc2kt7p5Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2kt7p5Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt7p5Exclu[ii] = TH2D("","", 500,-3.8,5.5,500,0.3,3.8 )
+    Histoc2kt7p5Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2kt7p5Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt7p5Exclu[ii].SetLineColor(mc[ii])
     Histoc2kt7p5Exclu[ii].SetMarkerColor(mc[ii])
@@ -1108,7 +1124,7 @@ for ii in range(0,nclu):
     Histoc2kt7p5Exclu[ii].SetMarkerSize(2.0)
     # kl = -7p5
     Histoc2ktm7p5[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2ktm7p5[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm7p5[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm7p5[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm7p5[ii].SetLineColor(mc[ii])
     Histoc2ktm7p5[ii].SetMarkerColor(mc[ii])
@@ -1116,23 +1132,23 @@ for ii in range(0,nclu):
     Histoc2ktm7p5[ii].SetMarkerSize(2.0)
     #    
     Histoc2ktm7p5Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2ktm7p5Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm7p5Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm7p5Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm7p5Exclu[ii].SetLineColor(mc[ii])
     Histoc2ktm7p5Exclu[ii].SetMarkerColor(mc[ii])
     Histoc2ktm7p5Exclu[ii].SetMarkerStyle(mtexclu[ii])
     Histoc2ktm7p5Exclu[ii].SetMarkerSize(2.0)
     # kl = 5p0
-    Histoc2kt5p0[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2kt5p0[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt5p0[ii] = TH2D("","", 500,-3.8,5.5,500,0.3,3.8  )
+    Histoc2kt5p0[ii].GetYaxis().SetTitle(" ")
     Histoc2kt5p0[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt5p0[ii].SetLineColor(mc[ii])
     Histoc2kt5p0[ii].SetMarkerColor(mc[ii])
     Histoc2kt5p0[ii].SetMarkerStyle(mt[ii])
     Histoc2kt5p0[ii].SetMarkerSize(2.0)
     #    
-    Histoc2kt5p0Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2kt5p0Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt5p0Exclu[ii] = TH2D("","", 500,-3.8,5.5,500,0.3,3.8  )
+    Histoc2kt5p0Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2kt5p0Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt5p0Exclu[ii].SetLineColor(mc[ii])
     Histoc2kt5p0Exclu[ii].SetMarkerColor(mc[ii])
@@ -1140,7 +1156,7 @@ for ii in range(0,nclu):
     Histoc2kt5p0Exclu[ii].SetMarkerSize(2.0)
     # kl = -5p0
     Histoc2ktm5p0[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2ktm5p0[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm5p0[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm5p0[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm5p0[ii].SetLineColor(mc[ii])
     Histoc2ktm5p0[ii].SetMarkerColor(mc[ii])
@@ -1148,23 +1164,23 @@ for ii in range(0,nclu):
     Histoc2ktm5p0[ii].SetMarkerSize(2.0)
     #    
     Histoc2ktm5p0Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2ktm5p0Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm5p0Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm5p0Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm5p0Exclu[ii].SetLineColor(mc[ii])
     Histoc2ktm5p0Exclu[ii].SetMarkerColor(mc[ii])
     Histoc2ktm5p0Exclu[ii].SetMarkerStyle(mtexclu[ii])
     Histoc2ktm5p0Exclu[ii].SetMarkerSize(2.0)
     # kl = 3p5
-    Histoc2kt3p5[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2kt3p5[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt3p5[ii] = TH2D("","", 500,-3.8,5.5,500,0.3,3.8 )
+    Histoc2kt3p5[ii].GetYaxis().SetTitle(" ")
     Histoc2kt3p5[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt3p5[ii].SetLineColor(mc[ii])
     Histoc2kt3p5[ii].SetMarkerColor(mc[ii])
     Histoc2kt3p5[ii].SetMarkerStyle(mt[ii])
     Histoc2kt3p5[ii].SetMarkerSize(2.0)
     #    
-    Histoc2kt3p5Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2kt3p5Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt3p5Exclu[ii] = TH2D("","", 500,-3.8,5.5,500,0.3,3.8  )
+    Histoc2kt3p5Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2kt3p5Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt3p5Exclu[ii].SetLineColor(mc[ii])
     Histoc2kt3p5Exclu[ii].SetMarkerColor(mc[ii])
@@ -1172,7 +1188,7 @@ for ii in range(0,nclu):
     Histoc2kt3p5Exclu[ii].SetMarkerSize(2.0)
     # kl = -3p5
     Histoc2ktm3p5[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2ktm3p5[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm3p5[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm3p5[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm3p5[ii].SetLineColor(mc[ii])
     Histoc2ktm3p5[ii].SetMarkerColor(mc[ii])
@@ -1180,23 +1196,23 @@ for ii in range(0,nclu):
     Histoc2ktm3p5[ii].SetMarkerSize(2.0)
     #    
     Histoc2ktm3p5Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2ktm3p5Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm3p5Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm3p5Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm3p5Exclu[ii].SetLineColor(mc[ii])
     Histoc2ktm3p5Exclu[ii].SetMarkerColor(mc[ii])
     Histoc2ktm3p5Exclu[ii].SetMarkerStyle(mtexclu[ii])
     Histoc2ktm3p5Exclu[ii].SetMarkerSize(2.0)
     # kl = 2p4
-    Histoc2kt2p4[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2kt2p4[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt2p4[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8  )
+    Histoc2kt2p4[ii].GetYaxis().SetTitle(" ")
     Histoc2kt2p4[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt2p4[ii].SetLineColor(mc[ii])
     Histoc2kt2p4[ii].SetMarkerColor(mc[ii])
     Histoc2kt2p4[ii].SetMarkerStyle(mt[ii])
     Histoc2kt2p4[ii].SetMarkerSize(2.0)
     #    
-    Histoc2kt2p4Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2kt2p4Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2kt2p4Exclu[ii] = TH2D("","", 500,-3.8,5.5,500,0.3,3.8 )
+    Histoc2kt2p4Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2kt2p4Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2kt2p4Exclu[ii].SetLineColor(mc[ii])
     Histoc2kt2p4Exclu[ii].SetMarkerColor(mc[ii])
@@ -1204,7 +1220,7 @@ for ii in range(0,nclu):
     Histoc2kt2p4Exclu[ii].SetMarkerSize(2.0)
     # kl = -2.4
     Histoc2ktm2p4[ii] = TH2D("","", 500,-4.8,3.5,500,0.3,3.8 )
-    Histoc2ktm2p4[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm2p4[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm2p4[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm2p4[ii].SetLineColor(mc[ii])
     Histoc2ktm2p4[ii].SetMarkerColor(mc[ii])
@@ -1212,7 +1228,7 @@ for ii in range(0,nclu):
     Histoc2ktm2p4[ii].SetMarkerSize(2.0)
     #    
     Histoc2ktm2p4Exclu[ii] = TH2D("","", 500,-3.5,3.5,500,0.3,2.8 )
-    Histoc2ktm2p4Exclu[ii].GetYaxis().SetTitle("#kappa_{t}")
+    Histoc2ktm2p4Exclu[ii].GetYaxis().SetTitle(" ")
     Histoc2ktm2p4Exclu[ii].GetXaxis().SetTitle("c_{2}")
     Histoc2ktm2p4Exclu[ii].SetLineColor(mc[ii])
     Histoc2ktm2p4Exclu[ii].SetMarkerColor(mc[ii])
@@ -1291,12 +1307,22 @@ for line in linespclu:
 #######################
 #for ii in range(0,nclu): print len(clusters[ii])
 #if(type==1) : 
+spreadx = np.zeros((npoints))
+spready = np.zeros((npoints))
+benchx = np.zeros((nclu))
+benchy = np.zeros((nclu))
 for point in range(0,1507):
     for ii in range(0,nclu):
         #print clusters[ii]
+        if (point == clusters[ii][0]) : 
+            benchx[ii] = ii+1
+            benchy[ii] =  limitsExp[point]
         if point in clusters[ii]: 
            ###
-           spread[ii].Fill(ii,limitsExp[ii] )
+           #spread[ii].Fill(limitsExp[ii] )
+           spreadx[point] = ii+1
+           spready[point] =  limitsExp[point]
+           #print "point "+str(point) +" "+ str(limitsExp[ii]) 
            #print "it is in cluster:  " +str(ii+1)
            if(L[point]==15.0 and cg[point] ==0 and c2g[point] ==0 ) : 
                if ( (ff15d15.Eval(c2[point],y[point]))*xs*BR > limitsExp[ii]  ) : Histoc2kt15Exclu[ii].Fill(c2[point],y[point])
@@ -1323,7 +1349,7 @@ for point in range(0,1507):
                if ( (ff15dm7p5.Eval(c2[point],y[point]))*xs*BR > limitsExp[ii]  ) : Histoc2ktm7p5Exclu[ii].Fill(c2[point],y[point])
                else : Histoc2ktm7p5[ii].Fill(c2[point],y[point]) 
            if(L[point]==5.0 and cg[point] ==0 and c2g[point] ==0 ) : 
-               if ( (ff15d10p0.Eval(c2[point],y[point]))*xs*BR > limitsExp[ii]  ) : Histoc2kt5p0Exclu[ii].Fill(c2[point],y[point])
+               if ( (ff15d5p0.Eval(c2[point],y[point]))*xs*BR > limitsExp[ii]  ) : Histoc2kt5p0Exclu[ii].Fill(c2[point],y[point])
                else : Histoc2kt5p0[ii].Fill(c2[point],y[point])  
            if(L[point]==-5.0 and cg[point] ==0 and c2g[point] ==0 ) : 
                if ( (ff15dm5p0.Eval(c2[point],y[point]))*xs*BR > limitsExp[ii]  ) : Histoc2ktm5p0Exclu[ii].Fill(c2[point],y[point])
@@ -1361,46 +1387,74 @@ for point in range(0,1507):
                else : Histocgc2g05[ii].Fill(cg[point],c2g[point])  
            #print str(point) + " "+str(c2[point]) + " "+str(y[point])+" cluster "+str(ii)+" "+  str(limitsExp[ii])  +" TH: "+str(math.exp(ff15d.Eval(c2[point],y[point]))*xs*BR)
 
+spread = None
+print len(spreadx)
+    #for ii in range(0,nclu):
+spread = TGraph(npoints,spreadx,spready)
+spread.GetYaxis().SetTitle(channel)
+spread.GetXaxis().SetTitle("Shape Benchmark")
+#
+bench = None
+print len(spreadx)
+#for ii in range(0,nclu):
+bench = TGraph(nclu,benchx,benchy)
+bench.GetYaxis().SetTitle(channel)
+bench.GetXaxis().SetTitle("Shape Benchmark")
+#spread.SetLineColor(mc[ii])
+bench.SetMarkerColor(2)
+
+#spread.SetMarkerStyle(10)
+#spread[ii].SetMarkerSize(0.5)
+#spread[ii].SetMaximum(1000000)
+#spread[ii].SetMinimum(100)
 ########################
 ## 
 ## draw
 ##
 #######################
-if (chan==1) :
-   if(type==1) : warning = "WW(ll)bb = warning, limits on benchmarks!"
-   elif(type==2) : warning = "the worst limits on benchmarks applied to all points!"
-   channel ="#sigma(pp #rightarrow HH #rightarrow ll#nu#nu b#bar{b})"
-elif (chan==2) :
-   if(type==1) : warning = "the worst limit of v1 extrapolated to all points"
-   elif(type==2) : warning = "the worst limits on benchmarks applied to all points!"
-   channel ="#sigma(pp #rightarrow HH #rightarrow #gamma#gamma b#bar{b})"
-elif (chan==3) :
-    warning = "warning, limits on benchmarks!"
-    channel ="#sigma(pp #rightarrow HH #rightarrow #tau#tau b#bar{b})"
-elif (chan==4) :
-    if(type==1) : warning = "limits on SM extrapolated to all!"
-    elif(type==2) : warning = "the worst limits on benchmarks applied to all points!"
-    channel ="#sigma(pp #rightarrow HH #rightarrow b#bar{b} b#bar{b})"
-text = TLatex()
-text.SetTextSize(0.05)
+text = TLatex() # CMS
+text.SetTextSize(0.04)
+textlumi = TLatex() # 
+textlumi.SetTextSize(0.04)
+textlumi.SetTextFont(42)
 text3 = TLatex()
-text3.SetTextSize(0.045)
+text3.SetTextSize(0.04)
 text2 = TLatex()
-text2.SetTextSize(0.038)   
+text2.SetTextSize(0.028) 
+text4 = TLatex()
+text4.SetTextSize(0.06) 
 #
 cx = TLatex()
-cx.SetTextSize(0.04);
+cx.SetTextSize(0.028);
 #
 lineHc2kt =  TLine(-4.8,2.7,3.5,2.7)
-lineTc2kt =  TLine(-1.2,2.7,-1.2,3.8)
+lineHc2ktpos =  TLine(-3.8,2.7,5.5,2.7)
+lineTc2kt =  TLine(-0.9,2.7,-0.9,3.8)
+lineTc2ktpos =  TLine(0.8,2.7,0.8,3.8)
 #
 lineHklcg =  TLine(-20,1.1,16,1.1)
-lineTklcg =  TLine(-5.0,1.1,-5.0,2.2)
+lineTklcg =  TLine(-2.0,1.1,-2.0,2.2)
 #
-lineHklkt =  TLine(-20,2.65,16,2.65)
-lineTklkt =  TLine(-5.0,2.65,-5.0,3.8)
+lineHklkt =  TLine(-21,2.65,16.5,2.65)
+lineTklkt =  TLine(-2.5,2.65,-2.5,3.8)
+#
+lineHc2cg =  TLine(-3.5,1.1,5.6,1.1)
+lineTc2cg =  TLine(0.9,1.1,0.9,2.2)
+#
+lineHcgc2g =  TLine(-1.4,1.1,1.1,1.1)
+lineTcgc2g =  TLine(-0.2,2.2,-0.2,1.1)
+# kt axis (of c2kt plots)
+axisc2kt = TGaxis(-4.8,0.4,-4.8,2.5,0.4,2.5,5,"")     
+axisc2kt.SetName("axisc2kt")
+# kt axis (of c2kt plots) kl >0
+axisc2ktpos = TGaxis(-3.8,0.4,-3.8,2.5,0.4,2.5,5,"")     
+axisc2ktpos.SetName("axisc2ktpos")
+# kt axis (of cgc2g plots)
+axiscgc2g = TGaxis(-1.4,-1.1,-1.4,1.0,-1.1,1.0,5,"")     
+axiscgc2g.SetName("axisc2kt")
 ################################
-c=TCanvas()
+c=TCanvas("c2","c2",200,50,600,600)
+Histoc2kt[0].SetNdivisions(0, "Y") #.GetYaxis().SetLabelOffset(999)
 Histoc2kt[0].Draw()
 leg2.AddEntry(allowed, "Allowed", "P")
 leg2.AddEntry(excluded, "Excluded", "P")
@@ -1408,7 +1462,7 @@ leg3.AddEntry(ff15d, "Th. cross section", "L")
 if(type==1) : 
   if (chan==4 or chan==3) : leg.AddEntry(Histoc2kt[0], str(round_sig(limitsExp[0]/1000, 3)), "P")
   else : leg.AddEntry(Histoc2kt[0], str(round_sig(limitsExp[0], 3)), "P")
-elif(type==2) : leg.AddEntry(Histoc2kt[0], "SB "+str(1), "P")
+elif(type==2) : leg.AddEntry(Histoc2kt[0], str(1), "P")
 Histoc2ktExclu[0].Draw("same")
 ff15d.Draw("same")
 for ii in range(1,nclu): 
@@ -1416,14 +1470,15 @@ for ii in range(1,nclu):
    if(type==1) : 
       if (chan==4 or chan==3) : leg.AddEntry(Histoc2kt[ii],str(round_sig(limitsExp[ii]/1000, 3)),"P") # lege20[ii], "P")
       else : leg.AddEntry(Histoc2kt[ii],str(round_sig(limitsExp[ii], 3)),"P") 
-   elif(type==2) : leg.AddEntry(Histoc2kt[ii], "SB "+str(ii+1), "P")
+   elif(type==2) : leg.AddEntry(Histoc2kt[ii], str(ii+1), "P")
    Histoc2ktExclu[ii].Draw("same")
 #text.DrawLatex(-4.2,3.55,"#kappa_{#lambda} = 1 ; c_{g} = c_{2g} = 0")
 #text2.DrawLatex(-4.2,3.55,"#sigma(pp #rightarrow HH #rightarrow #gamma#gamma b#bar{b})")
 text3.DrawLatex(-4.5,3.55,channel)
 text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = 1")
-text.DrawLatex(-4.45,3.9,warning)
+text.DrawLatex(-4.4,2.45,"#kappa_{#lambda} = 1")
+text.DrawLatex(-4.8,3.9,warning)
+textlumi.DrawLatex(0.2,3.9,lumi)
 lineHc2kt.Draw("same")
 lineTc2kt.Draw("same")
 leg.Draw("same")
@@ -1439,10 +1494,22 @@ if (chan==2) :
     cx.DrawLatex(-4.1,1.63,"#color[12]{20 fb}");
     cx.SetTextAngle(75);
     cx.DrawLatex(-3.5,0.6,"#color[12]{10 fb}");
+if (chan==3) :
+    cx.SetTextAngle(70);
+    cx.DrawLatex(-4.1,1.23,"#color[12]{500 fb}");
+    cx.SetTextAngle(75);
+    cx.DrawLatex(-3.5,0.6,"#color[12]{300 fb}");
+    #print (ff15d.Eval(-3,1))*(xs*BR)
+# kt axis
+axisc2kt.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-5.7,2.3,"#kappa_{t}")
 c.Print(outfolder+"/c2_kt.png")
 c.Close()
 #############################
-ckl=TCanvas()
+ckl=TCanvas("c2","c2",200,50,600,600)
+Histoklkt[0].SetNdivisions(0, "Y") #.GetYaxis().SetLabelOffset(999)
+Histoklkt[0].GetYaxis().CenterTitle()
 Histoklkt[0].Draw()
 HistoklktExclu[0].Draw("same")
 ff25d.Draw("same")
@@ -1450,8 +1517,9 @@ for ii in range(1,nclu):
     Histoklkt[ii].Draw("same")
     HistoklktExclu[ii].Draw("same")
 #text.DrawLatex(-19,3.55,"c_{2} = c_{2g} = c_{g} = 0 ")
-text3.DrawLatex(-19,3.55,channel)
-text.DrawLatex(-19,3.9,warning)
+text3.DrawLatex(-19.5,3.55,channel)
+text.DrawLatex(-21,3.9,warning)
+textlumi.DrawLatex(2.1,3.9,lumi)
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
@@ -1468,13 +1536,28 @@ if (chan==1) :
 if (chan==2) :
     cx.SetTextAngle(33);
     cx.DrawLatex(-19,1.95,"#color[12]{50 fb}");
+    cx.SetTextAngle(28);
+    cx.DrawLatex(-19,1.35,"#color[12]{20 fb}");
     cx.SetTextAngle(25);
-    cx.DrawLatex(-19,1.40,"#color[12]{20 fb}");
+    cx.DrawLatex(-19,1.0,"#color[12]{10 fb}");
+if (chan==3) :
+    cx.SetTextAngle(30);
+    cx.DrawLatex(-19,1.25,"#color[12]{500 fb}");
     cx.SetTextAngle(25);
-    cx.DrawLatex(-19,1.01,"#color[12]{10 fb}");
+    cx.DrawLatex(-19,1.01,"#color[12]{300 fb}");
+    cx.SetTextAngle(20);
+    cx.DrawLatex(-19,0.63,"#color[12]{100 fb}");
+# kt axis
+axis2 = TGaxis(-21.,0.4,-21,2.5,0.4,2.5,5,"")     
+axis2.SetName("axis2")
+axis2.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-25,2.3,"#kappa_{t}")
 ckl.Print(outfolder+"/kl_kt.png")
+ckl.Print(outfolder+"/kl_kt.pdf")
 ###############################
-ckl=TCanvas()
+ckl=TCanvas("c2","c2",200,50,600,600)
+Histoklcg[0].SetNdivisions(0, "Y")
 Histoklcg[0].Draw()
 HistoklcgExclu[0].Draw("same")
 ff35d.Draw("same")
@@ -1483,7 +1566,8 @@ for ii in range(1,nclu):
     HistoklcgExclu[ii].Draw("same")
 #text.DrawLatex(-19,2.0,"#kappa_{t} = 1 ; c_{2} = 0 ; c_{2} = -c_{2g}")
 text3.DrawLatex(-19,1.95,channel)
-text.DrawLatex(-19,2.3,warning)
+text.DrawLatex(-20,2.3,warning)
+textlumi.DrawLatex(2,2.3,lumi)
 lineHklcg.Draw("same")
 lineTklcg.Draw("same")
 leg.Draw("same")
@@ -1499,10 +1583,21 @@ elif (chan==2) :
     cx.DrawLatex(-18,0.05,"#color[12]{10 fb}");
     cx.SetTextAngle(35);
     cx.DrawLatex(-18,-0.65,"#color[12]{5 fb}");
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+elif (chan==3) :
+    cx.SetTextAngle(53);
+    cx.DrawLatex(-18.6,0.045,"#color[12]{300 fb}");
+    cx.SetTextAngle(35);
+    cx.DrawLatex(-18.6,-1.04,"#color[12]{100 fb}");
+text2.DrawLatex(-18.5,1.2,"(Assuming SM H decays)")
+axis3 = TGaxis(-20.,-1.1,-20,1.2,-1.1,1.2,5,"")     
+axis3.SetName("axis3")
+axis3.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-23.8,0.3,"#scale[0.8]{c_{g} (= - c_{2g} )}")
 ckl.Print(outfolder+"/kl_cg.png")
 ####################################
-ccgc2g=TCanvas()
+ccgc2g=TCanvas("c2","c2",200,50,600,600)
+Histocgc2g[0].SetNdivisions(0, "Y")
 Histocgc2g[0].Draw()
 Histocgc2gExclu[0].Draw("same")
 ff45d.Draw("same")
@@ -1510,10 +1605,12 @@ for ii in range(1,nclu):
     Histocgc2g[ii].Draw("same")
     Histocgc2gExclu[ii].Draw("same")
 #text.DrawLatex(-19,2.0,"#kappa_{t} = 1 ; c_{2} = 0 ; c_{2} = -c_{2g}")
-text3.DrawLatex(-1.3,1.95,channel)
-text.DrawLatex(-1.3,2.3,warning)
-#lineHklcg.Draw("same")
-#lineTklcg.Draw("same")
+text3.DrawLatex(-1.35,1.95,channel)
+textlumi.DrawLatex(0.1,2.25,lumi)
+text.DrawLatex(-1.4,2.25,warning)
+text2.DrawLatex(-1.3,1.2,"(Assuming SM H decays)")
+lineHcgc2g.Draw("same")
+lineTcgc2g.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
@@ -1527,29 +1624,42 @@ elif (chan==2) :
     cx.DrawLatex(-1.3,-0.35,"#color[12]{0.1 fb}");
     cx.SetTextAngle(15);
     cx.DrawLatex(-1.3,0.35,"#color[12]{0.2 fb}");
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+elif (chan==3) : 
+    cx.SetTextAngle(10);
+    cx.DrawLatex(-1.3,0.9,"#color[12]{10 fb}");
+    cx.SetTextAngle(10);
+    cx.DrawLatex(-1.3,0.25,"#color[12]{5 fb}");
+    print (ff45d.Eval(-1,0.3))*(xs*BR)
+axiscgc2g.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-1.6,0.75,"c_{2g}")
 ccgc2g.Print(outfolder+"/cg_c2g.png")
 ##################################
-cc2cg=TCanvas()
+cc2cg=TCanvas("c2","c2",200,50,600,600)
+Histoc2cg[0].SetNdivisions(0, "Y")
 Histoc2cg[0].Draw()
 Histoc2cgExclu[0].Draw("same")
 ff55d.Draw("same")
+lineHc2cg.Draw("same")
+lineTc2cg.Draw("same")
 for ii in range(1,nclu): 
     Histoc2cg[ii].Draw("same")
     Histoc2cgExclu[ii].Draw("same")
 #text.DrawLatex(-19,2.0,"#kappa_{t} = 1 ; c_{2} = 0 ; c_{2} = -c_{2g}")
 text3.DrawLatex(-3.2,1.95,channel)
-text.DrawLatex(-3.1,2.3,warning)
+text.DrawLatex(-3.5,2.26,warning)
+textlumi.DrawLatex(2,2.26,lumi)
 #lineHklcg.Draw("same")
 #lineTklcg.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
 if (chan==1) :
-    cx.SetTextAngle(-15);
-    cx.DrawLatex(-1.3,-0.2,"#color[12]{0.5 fb}");
-    cx.SetTextAngle(15);
-    cx.DrawLatex(-1.3,0.4,"#color[12]{1 fb}");
+    cx.SetTextAngle(-83);
+    cx.DrawLatex(3.97,-0.38,"#color[12]{50 fb}");
+    cx.SetTextAngle(-83);
+    cx.DrawLatex(5.15,0.35,"#color[12]{100 fb}");
+#print (ff55d.Eval(3,0))*(xs*BR)
 elif (chan==2) :
     cx.SetTextAngle(-85);
     cx.DrawLatex(3.9,-0.35,"#color[12]{10 fb}");
@@ -1557,15 +1667,23 @@ elif (chan==2) :
     cx.DrawLatex(4.5,0.35,"#color[12]{20 fb}");
 elif (chan==3) : 
     cx.SetTextAngle(-80);
-    cx.DrawLatex(3.98,-0.38,"#color[12]{300 fb}");
+    cx.DrawLatex(3.97,-0.38,"#color[12]{300 fb}");
     cx.SetTextAngle(-80);
-    cx.DrawLatex(4.8,0.35,"#color[12]{500 fb}");
-text2.DrawLatex(-3.4,1.0,"(Assuming SM H decays)")
+    cx.DrawLatex(4.7,0.35,"#color[12]{500 fb}");
+#print (ff55d.Eval(0,1))*(xs*BR)
+text2.DrawLatex(-3.0,1.2,"(Assuming SM H decays)")
+axis4 = TGaxis(-3.5,-1.1,-3.5,1.2,-1.1,1.2,5,"")     
+axis4.SetName("axis3")
+axis4.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-4.48,0.3,"#scale[0.75]{c_{g} (= - c_{2g} )}")
 cc2cg.Print(outfolder+"/c2_c2g.png")
 ####################################
-ccgc2g05=TCanvas()
+# skip
+ccgc2g05=TCanvas("c2","c2",200,50,600,600)
 Histocgc2g05[0].Draw()
 Histocgc2g05Exclu[0].Draw("same")
+text.DrawLatex(-1.4,0.9,"c_{2} = 0.5")
 ff65d.Draw("same")
 for ii in range(1,nclu): 
     Histocgc2g05[ii].Draw("same")
@@ -1573,6 +1691,8 @@ for ii in range(1,nclu):
 #text.DrawLatex(-19,2.0,"#kappa_{t} = 1 ; c_{2} = 0 ; c_{2} = -c_{2g}")
 text3.DrawLatex(-1.3,1.95,channel)
 text.DrawLatex(-1.3,2.3,warning)
+textlumi.DrawLatex(0.2,2.3,lumi)
+text2.DrawLatex(-1.3,1.2,"(Assuming SM H decays)")
 #lineHklcg.Draw("same")
 #lineTklcg.Draw("same")
 leg.Draw("same")
@@ -1591,7 +1711,8 @@ elif (chan==5) :
 text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
 ccgc2g05.Print(outfolder+"/cg_c2g_c20p5.png")
 ###################################
-cm15=TCanvas()
+cm15=TCanvas("c2","c2",200,50,600,600)
+Histoc2ktm15[0].SetNdivisions(0, "Y")
 Histoc2ktm15[0].Draw()
 Histoc2kt[0].SetTickLength(0.0, "X")
 gPad.Update()
@@ -1604,7 +1725,8 @@ for ii in range(1,nclu):
 text3.DrawLatex(-4.5,3.55,channel)
 text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
 text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = -15")
-text.DrawLatex(-4.45,3.9,warning)
+text.DrawLatex(-4.8,3.85,warning)
+textlumi.DrawLatex(0.3,3.85,lumi)
 lineHc2kt.Draw("same")
 lineTc2kt.Draw("same")
 leg.Draw("same")
@@ -1622,19 +1744,22 @@ if (chan==2) :
     cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
     cx.SetTextAngle(35);
     cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-if (chan==5) :
+if (chan==3) :
     cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
+    cx.DrawLatex(-3.98,1.4,"#color[12]{1000 fb}");
     cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+    cx.DrawLatex(-4,0.95,"#color[12]{1500 fb}");
+    #print (ff15dm15.Eval(-4,1))*(xs*BR)
+axisc2kt.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-5.7,2.3,"#kappa_{t}")
 cm15.Print(outfolder+"/c2_kt_klm15.png")
 cm15.Close()
 ###################################
-c15=TCanvas()
+c15=TCanvas("c22","c22",200,50,600,600)
+Histoc2kt15[0].SetNdivisions(0, "Y")
 Histoc2kt15[0].Draw()
-Histoc2kt15[0].SetTickLength(0.0, "X")
+Histoc2kt15[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2kt15Exclu[0].Draw("same")
 ff15d15.Draw("same")
@@ -1642,37 +1767,45 @@ for ii in range(1,nclu):
     Histoc2kt15[ii].Draw("same")
     Histoc2kt15Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
-text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = 15")
-text.DrawLatex(-4.45,3.9,warning)
-lineHc2kt.Draw("same")
-lineTc2kt.Draw("same")
+text2.DrawLatex(-3.4,2.8,"(Assuming SM H decays)")
+text.DrawLatex(3.8,2.45,"#kappa_{#lambda} = 15")
+text3.DrawLatex(-3.5,3.55,channel)
+text.DrawLatex(-3.8,3.88,warning)
+textlumi.DrawLatex(1.8,3.85,lumi)
+lineHc2ktpos.Draw("same")
+lineTc2ktpos.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+if (chan==3) :
+    cx.SetTextAngle(-50);
+    cx.DrawLatex(3.0,0.85,"#color[12]{500 fb}");
+    cx.SetTextAngle(-57);
+    cx.DrawLatex(4.0,1.5,"#color[12]{1000 fb}");
+if (chan==2) :
+    cx.SetTextAngle(-54);
+    cx.DrawLatex(3.3,0.85,"#color[12]{20 fb}");
+    cx.SetTextAngle(-50);
+    cx.DrawLatex(1.95,0.8,"#color[12]{10 fb}");
+if (chan==1) :
+    cx.SetTextAngle(-54);
+    cx.DrawLatex(3.45,0.85,"#color[12]{100 fb}");
+    cx.SetTextAngle(-56);
+    cx.DrawLatex(4.0,1.2,"#color[12]{150 fb}");
+#print (ff15d15.Eval(3,1))*(xs*BR)
+# kt axis
+axisc2ktpos.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-4.8,2.3,"#kappa_{t}")
 c15.Print(outfolder+"/c2_kt_kl15.png")
 c15.Close()
 ###############################
 # 12.5
 ###################################
-cm12p5=TCanvas()
+cm12p5=TCanvas("c23","c23",200,50,600,600)
+Histoc2ktm12p5[0].SetNdivisions(0, "Y")
 Histoc2ktm12p5[0].Draw()
-Histoc2kt12p5[0].SetTickLength(0.0, "X")
+Histoc2kt12p5[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2ktm12p5Exclu[0].Draw("same")
 ff15dm12p5.Draw("same")
@@ -1680,35 +1813,45 @@ for ii in range(1,nclu):
     Histoc2ktm12p5[ii].Draw("same")
     Histoc2ktm12p5Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
+text3.DrawLatex(-4.65,3.55,channel)
 text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = -12.5")
-text.DrawLatex(-4.45,3.9,warning)
+text.DrawLatex(-4.6,2.45,"#scale[0.85]{#kappa_{#lambda} = -12.5}")
+text.DrawLatex(-4.8,3.85,warning)
+textlumi.DrawLatex(0.3,3.85,lumi)
 lineHc2kt.Draw("same")
 lineTc2kt.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
+if (chan==1) :
     cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
+    cx.DrawLatex(-4.1,1.73,"#color[12]{300 fb}");
     cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
+    cx.DrawLatex(-4.1,1.25,"#color[12]{200 fb}");
+    cx.SetTextAngle(38);
+    cx.DrawLatex(-4.1,0.9,"#color[12]{150 fb}");
+#print ff15dm15.Eval(-3.0,2.0)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(33);
+    cx.DrawLatex(-4.04,1.45,"#color[12]{50 fb}");
+    cx.SetTextAngle(38);
+    cx.DrawLatex(-3.8,0.55,"#color[12]{20 fb}");
+if (chan==3) :
+    cx.SetTextAngle(33);
+    cx.DrawLatex(-3.95,1.14,"#color[12]{500 fb}");
+    cx.SetTextAngle(38);
+    cx.DrawLatex(-3.8,0.5,"#color[12]{300 fb}");
 #print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+axisc2kt.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-5.7,2.3,"#kappa_{t}")
 cm12p5.Print(outfolder+"/c2_kt_klm12p5.png")
 cm12p5.Close()
 ###################################
-c12p5=TCanvas()
+c12p5=TCanvas("c2","c2",200,50,600,600)
+Histoc2kt12p5[0].SetNdivisions(0, "Y")
 Histoc2kt12p5[0].Draw()
-Histoc2kt12p5[0].SetTickLength(0.0, "X")
+Histoc2kt12p5[0].SetTickLength(0.01, "XY")
 gPad.Update()
 Histoc2kt12p5Exclu[0].Draw("same")
 ff15d12p5.Draw("same")
@@ -1716,37 +1859,47 @@ for ii in range(1,nclu):
     Histoc2kt12p5[ii].Draw("same")
     Histoc2kt12p5Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
-text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = 12.5")
-text.DrawLatex(-4.45,3.9,warning)
-lineHc2kt.Draw("same")
-lineTc2kt.Draw("same")
+text3.DrawLatex(-3.5,3.55,channel)
+text2.DrawLatex(-3.4,2.8,"(Assuming SM H decays)")
+text.DrawLatex(3.6,2.45,"#kappa_{#lambda} = 12.5")
+text.DrawLatex(-3.8,3.88,warning)
+textlumi.DrawLatex(1.8,3.88,lumi)
+lineHc2ktpos.Draw("same")
+lineTc2ktpos.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
+if (chan==1) :
+    cx.SetTextAngle(-68);
+    cx.DrawLatex(4.4,1.25,"#color[12]{150 fb}");
+    cx.SetTextAngle(-62);
+    cx.DrawLatex(3.87,0.75,"#color[12]{100 fb}");
+#print ff15d12p5.Eval(3,1.5)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(-65);
+    cx.DrawLatex(3.65,0.85,"#color[12]{20 fb}");
+    cx.SetTextAngle(-60);
+    cx.DrawLatex(2.17,0.85,"#color[12]{10 fb}");
+if (chan==3) :
+    cx.SetTextAngle(-68);
+    cx.DrawLatex(4.8,1.25,"#color[12]{1000 fb}");
+    cx.SetTextAngle(-62);
+    cx.DrawLatex(3.5,0.75,"#color[12]{500 fb}");
+#    print ff15d12p5.Eval(3,1)*xs*BR
 text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+# kt axis
+axisc2ktpos.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-4.8,2.3,"#kappa_{t}")
 c12p5.Print(outfolder+"/c2_kt_kl12p5.png")
 c12p5.Close()
 ###############################
 # 10.0
 ###################################
-cm10p0=TCanvas()
+cm10p0=TCanvas("c2","c2",200,50,600,600)
+Histoc2ktm10p0[0].SetNdivisions(0, "Y")
 Histoc2ktm10p0[0].Draw()
-Histoc2kt10p0[0].SetTickLength(0.0, "X")
+Histoc2kt10p0[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2ktm10p0Exclu[0].Draw("same")
 ff15dm10p0.Draw("same")
@@ -1754,35 +1907,45 @@ for ii in range(1,nclu):
     Histoc2ktm10p0[ii].Draw("same")
     Histoc2ktm10p0Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
+text3.DrawLatex(-4.7,3.55,channel)
 text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
 text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = -10")
-text.DrawLatex(-4.45,3.9,warning)
+text.DrawLatex(-4.8,3.85,warning)
+textlumi.DrawLatex(0.3,3.85,lumi)
 lineHc2kt.Draw("same")
 lineTc2kt.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
+if (chan==1) :
+    cx.SetTextAngle(38);
+    cx.DrawLatex(-3.98,1.46,"#color[12]{300 fb}");
+    cx.SetTextAngle(38);
+    cx.DrawLatex(-3.98,1.1,"#color[12]{200 fb}");
+    cx.SetTextAngle(48);
+    cx.DrawLatex(-3.8,0.65,"#color[12]{150 fb}");
+#print ff15dm15.Eval(-3.0,1.5)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(38);
+    cx.DrawLatex(-3.98,1.65,"#color[12]{50 fb}");
+    cx.SetTextAngle(48);
+    cx.DrawLatex(-3.8,0.63,"#color[12]{10 fb}");
+if (chan==3) :
+    cx.SetTextAngle(38);
+    cx.DrawLatex(-3.98,1.25,"#color[12]{1000 fb}");
+    cx.SetTextAngle(48);
+    cx.DrawLatex(-3.8,0.5,"#color[12]{500 fb}");
 #print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+axisc2kt.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-5.7,2.3,"#kappa_{t}")
 cm10p0.Print(outfolder+"/c2_kt_klm10p0.png")
 cm10p0.Close()
 ###################################
-c10p0=TCanvas()
+c10p0=TCanvas("c2","c2",200,50,600,600)
+Histoc2kt10p0[0].SetNdivisions(0, "Y")
 Histoc2kt10p0[0].Draw()
-Histoc2kt10p0[0].SetTickLength(0.0, "X")
+Histoc2kt10p0[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2kt10p0Exclu[0].Draw("same")
 ff15d10p0.Draw("same")
@@ -1790,37 +1953,44 @@ for ii in range(1,nclu):
     Histoc2kt10p0[ii].Draw("same")
     Histoc2kt10p0Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
-text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = 10")
-text.DrawLatex(-4.45,3.9,warning)
-lineHc2kt.Draw("same")
-lineTc2kt.Draw("same")
+text2.DrawLatex(-3.4,2.8,"(Assuming SM H decays)")
+text.DrawLatex(3.6,2.45,"#kappa_{#lambda} = 10")
+text3.DrawLatex(-3.5,3.55,channel)
+text.DrawLatex(-3.8,3.88,warning)
+textlumi.DrawLatex(1.8,3.85,lumi)
+lineHc2ktpos.Draw("same")
+lineTc2ktpos.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
+if (chan==1) :
+    cx.SetTextAngle(-72);
+    cx.DrawLatex(5.0,1.1,"#color[12]{200 fb}");
+    cx.SetTextAngle(-69);
+    cx.DrawLatex(4.17,0.8,"#color[12]{150 fb}");
+#print ff15dm15.Eval(3.0,2.0)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(-67);
+    cx.DrawLatex(3.93,0.85,"#color[12]{20 fb}");
+    cx.SetTextAngle(-65);
+    cx.DrawLatex(2.45,0.85,"#color[12]{10 fb}");
+if (chan==3) :
+    cx.SetTextAngle(-67);
+    cx.DrawLatex(3.7,0.8,"#color[12]{500 fb}");
+# kt axis
+axisc2ktpos.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-4.8,2.3,"#kappa_{t}")
 #print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
 c10p0.Print(outfolder+"/c2_kt_kl10p0.png")
 c10p0.Close()
 ###############################
 # 7.5
 ###################################
-cm7p5=TCanvas()
+cm7p5=TCanvas("c2","c2",200,50,600,600)
+Histoc2ktm7p5[0].SetNdivisions(0, "Y")
 Histoc2ktm7p5[0].Draw()
-Histoc2kt7p5[0].SetTickLength(0.0, "X")
+Histoc2ktm7p5[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2ktm7p5Exclu[0].Draw("same")
 ff15dm7p5.Draw("same")
@@ -1828,35 +1998,46 @@ for ii in range(1,nclu):
     Histoc2ktm7p5[ii].Draw("same")
     Histoc2ktm7p5Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
+if (chan==3 or chan==2) :text3.DrawLatex(-4.5,3.55,channel)
+elif (chan==1) :text3.DrawLatex(-4.7,3.55,channel)
 text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = -7.5")
-text.DrawLatex(-4.45,3.9,warning)
+text.DrawLatex(-4.55,2.45,"#scale[0.9]{#kappa_{#lambda} = -7.5 }")
+text.DrawLatex(-4.8,3.9,warning)
+textlumi.DrawLatex(0.3,3.85,lumi)
 lineHc2kt.Draw("same")
 lineTc2kt.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+if (chan==1) :
+    cx.SetTextAngle(44);
+    cx.DrawLatex(-4.2,1.6,"#color[12]{200 fb}");
+    cx.SetTextAngle(42);
+    cx.DrawLatex(-4.2,1.2,"#color[12]{150 fb}");
+    cx.SetTextAngle(53);
+    cx.DrawLatex(-4,0.7,"#color[12]{100 fb}");
+#print ff15dm7p5.Eval(-3,2)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(40);
+    cx.DrawLatex(-4.2,1.83,"#color[12]{50 fb}");
+    cx.SetTextAngle(55);
+    cx.DrawLatex(-4,0.65,"#color[12]{20 fb}");
+if (chan==3) :
+    cx.SetTextAngle(40);
+    cx.DrawLatex(-4.2,1.36,"#color[12]{1000 fb}");
+    cx.SetTextAngle(55);
+    cx.DrawLatex(-4,0.5,"#color[12]{500 fb}");
+#print ff15dm7p5.Eval(-3,1)*xs*BR
+axisc2kt.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-5.7,2.3,"#kappa_{t}")
 cm7p5.Print(outfolder+"/c2_kt_klm7p5.png")
 cm7p5.Close()
 ###################################
-c7p5=TCanvas()
+c7p5=TCanvas("c2","c2",200,50,600,600)
+Histoc2kt7p5[0].SetNdivisions(0, "Y")
 Histoc2kt7p5[0].Draw()
-Histoc2kt7p5[0].SetTickLength(0.0, "X")
+Histoc2kt7p5[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2kt7p5Exclu[0].Draw("same")
 ff15d7p5.Draw("same")
@@ -1864,37 +2045,46 @@ for ii in range(1,nclu):
     Histoc2kt7p5[ii].Draw("same")
     Histoc2kt7p5Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
-text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = 7.5")
-text.DrawLatex(-4.45,3.9,warning)
-lineHc2kt.Draw("same")
-lineTc2kt.Draw("same")
+text2.DrawLatex(-3.4,2.8,"(Assuming SM H decays)")
+text.DrawLatex(3.6,2.45,"#kappa_{#lambda} = 7.5")
+text3.DrawLatex(-3.5,3.55,channel)
+text.DrawLatex(-3.8,3.88,warning)
+textlumi.DrawLatex(1.8,3.85,lumi)
+lineHc2ktpos.Draw("same")
+lineTc2ktpos.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+if (chan==1) :
+    cx.SetTextAngle(-75);
+    cx.DrawLatex(3.0,0.8,"#color[12]{100 fb}");
+    cx.SetTextAngle(-76);
+    cx.DrawLatex(4.35,0.88,"#color[12]{150 fb}");
+#print ff15d7p5.Eval(3.0,0.5)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(-77);
+    cx.DrawLatex(4.25,0.85,"#color[12]{20 fb}");
+    cx.SetTextAngle(-75);
+    cx.DrawLatex(2.8,0.85,"#color[12]{10 fb}");
+if (chan==3) :
+    cx.SetTextAngle(-75);
+    cx.DrawLatex(3.0,0.8,"#color[12]{300 fb}");
+    cx.SetTextAngle(-75);
+    cx.DrawLatex(4.0,0.88,"#color[12]{500 fb}");
+#print ff15d7p5.Eval(3.0,0.5)*xs*BR
+# kt axis
+axisc2ktpos.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-4.8,2.3,"#kappa_{t}")
 c7p5.Print(outfolder+"/c2_kt_kl7p5.png")
 c7p5.Close()
 ###############################
 # 5.0
 ###################################
-cm5p0=TCanvas()
+cm5p0=TCanvas("c2","c2",200,50,600,600)
+Histoc2ktm5p0[0].SetNdivisions(0, "Y")
 Histoc2ktm5p0[0].Draw()
-Histoc2kt5p0[0].SetTickLength(0.0, "X")
+Histoc2ktm5p0[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2ktm5p0Exclu[0].Draw("same")
 ff15dm5p0.Draw("same")
@@ -1902,35 +2092,45 @@ for ii in range(1,nclu):
     Histoc2ktm5p0[ii].Draw("same")
     Histoc2ktm5p0Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
+if (chan==3 or chan==2) : text3.DrawLatex(-4.5,3.55,channel)
+elif (chan==1) : text3.DrawLatex(-4.7,3.55,channel)
 text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = -5")
-text.DrawLatex(-4.45,3.9,warning)
+text.DrawLatex(-4.55,2.45,"#scale[0.9]{#kappa_{#lambda} = -5.0 }")
+text.DrawLatex(-4.8,3.9,warning)
+textlumi.DrawLatex(0.3,3.85,lumi)
 lineHc2kt.Draw("same")
 lineTc2kt.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+if (chan==1) :
+    cx.SetTextAngle(45);
+    cx.DrawLatex(-4.0,1.53,"#color[12]{150 fb}");
+    cx.SetTextAngle(55);
+    cx.DrawLatex(-4.0,0.9,"#color[12]{100 fb}");
+#print ff15dm5p0.Eval(-3.0,2.0)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(60);
+    cx.DrawLatex(-2.8,0.65,"#color[12]{10 fb}");
+    cx.SetTextAngle(55);
+    cx.DrawLatex(-4.25,0.65,"#color[12]{20 fb}");
+if (chan==3) :
+    cx.SetTextAngle(45);
+    cx.DrawLatex(-4.0,1.68,"#color[12]{1000 fb}");
+    cx.SetTextAngle(55);
+    cx.DrawLatex(-4.0,0.65,"#color[12]{500 fb}");
+#print ff15dm5p0.Eval(-3.0,1.0)*xs*BR
+# [5/(xs*BR),10/(xs*BR),20/(xs*BR),50/(xs*BR),--100/(xs*BR),300/(xs*BR),500/(xs*BR),1000/(xs*BR),1500/(xs*BR)]
+axisc2kt.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-5.7,2.3,"#kappa_{t}")
 cm5p0.Print(outfolder+"/c2_kt_klm5p0.png")
 cm5p0.Close()
 ###################################
-c5p0=TCanvas()
+c5p0=TCanvas("c2","c2",200,50,600,600)
+Histoc2kt5p0[0].SetNdivisions(0, "Y")
 Histoc2kt5p0[0].Draw()
-Histoc2kt5p0[0].SetTickLength(0.0, "X")
+Histoc2kt5p0[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2kt5p0Exclu[0].Draw("same")
 ff15d5p0.Draw("same")
@@ -1938,37 +2138,47 @@ for ii in range(1,nclu):
     Histoc2kt5p0[ii].Draw("same")
     Histoc2kt5p0Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
-text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = 5")
-text.DrawLatex(-4.45,3.9,warning)
-lineHc2kt.Draw("same")
-lineTc2kt.Draw("same")
+text2.DrawLatex(-3.4,2.8,"(Assuming SM H decays)")
+text.DrawLatex(3.6,2.45,"#kappa_{#lambda} = 5.0")
+text3.DrawLatex(-3.5,3.55,channel)
+text.DrawLatex(-3.8,3.88,warning)
+textlumi.DrawLatex(1.8,3.85,lumi)
+lineHc2ktpos.Draw("same")
+lineTc2ktpos.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
+if (chan==1) :
+    cx.SetTextAngle(-80);
+    cx.DrawLatex(3.2,0.8,"#color[12]{50 fb}");
+    cx.SetTextAngle(-90);
+    cx.DrawLatex(4.7,0.88,"#color[12]{100 fb}");
+#print ff15dm5p0.Eval(4.6,0.5)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(-87);
+    cx.DrawLatex(4.55,0.85,"#color[12]{20 fb}");
+    cx.SetTextAngle(-85);
+    cx.DrawLatex(3.15,0.85,"#color[12]{10 fb}");
+if (chan==3) :
+    cx.SetTextAngle(-80);
+    cx.DrawLatex(3.2,0.8,"#color[12]{300 fb}");
+    cx.SetTextAngle(-80);
+    cx.DrawLatex(4.2,0.88,"#color[12]{500 fb}");
+#print ff15dm5p0.Eval(3.0,0.5)*xs*BR
 text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+# kt axis
+axisc2ktpos.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-4.8,2.3,"#kappa_{t}")
 c5p0.Print(outfolder+"/c2_kt_kl5p0.png")
 c5p0.Close()
 ###############################
 # 3.5
 ###################################
-cm3p5=TCanvas()
+cm3p5=TCanvas("c2","c2",200,50,600,600)
+Histoc2ktm3p5[0].SetNdivisions(0, "Y")
 Histoc2ktm3p5[0].Draw()
-Histoc2kt3p5[0].SetTickLength(0.0, "X")
+Histoc2ktm3p5[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2ktm3p5Exclu[0].Draw("same")
 ff15dm3p5.Draw("same")
@@ -1976,35 +2186,43 @@ for ii in range(1,nclu):
     Histoc2ktm3p5[ii].Draw("same")
     Histoc2ktm3p5Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
+if (chan==3 or chan ==2) :text3.DrawLatex(-4.5,3.55,channel)
+elif (chan==1) :text3.DrawLatex(-4.7,3.55,channel)
 text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = -3.5")
-text.DrawLatex(-4.45,3.9,warning)
+text.DrawLatex(-4.55,2.45,"#scale[0.9]{#kappa_{#lambda} = -3.5 }")
+text.DrawLatex(-4.8,3.9,warning)
+textlumi.DrawLatex(0.3,3.85,lumi)
 lineHc2kt.Draw("same")
 lineTc2kt.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+if (chan==1) :
+    cx.SetTextAngle(55);
+    cx.DrawLatex(-4.25,0.9,"#color[12]{100 fb}");
+    cx.SetTextAngle(65);
+    cx.DrawLatex(-3.25,0.5,"#color[12]{50 fb}");
+if (chan==2) :
+    cx.SetTextAngle(60);
+    cx.DrawLatex(-2.98,0.65,"#color[12]{10 fb}");
+    cx.SetTextAngle(60);
+    cx.DrawLatex(-4.4,0.65,"#color[12]{20 fb}");
+if (chan==3) :
+    cx.SetTextAngle(65);
+    cx.DrawLatex(-4.25,0.5,"#color[12]{500 fb}");
+    cx.SetTextAngle(65);
+    cx.DrawLatex(-3.25,0.5,"#color[12]{300 fb}");
+#print ff15dm3p5.Eval(-4,0.5)*xs*BR
+axisc2kt.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-5.7,2.3,"#kappa_{t}")
 cm3p5.Print(outfolder+"/c2_kt_klm3p5.png")
 cm3p5.Close()
 ###################################
-c3p5=TCanvas()
+c3p5=TCanvas("c2","c2",200,50,600,600)
+Histoc2kt3p5[0].SetNdivisions(0, "Y")
 Histoc2kt3p5[0].Draw()
-Histoc2kt3p5[0].SetTickLength(0.0, "X")
+Histoc2kt3p5[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2kt3p5Exclu[0].Draw("same")
 ff15d3p5.Draw("same")
@@ -2012,37 +2230,46 @@ for ii in range(1,nclu):
     Histoc2kt3p5[ii].Draw("same")
     Histoc2kt3p5Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
-text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = 3.5")
-text.DrawLatex(-4.45,3.9,warning)
-lineHc2kt.Draw("same")
-lineTc2kt.Draw("same")
+text3.DrawLatex(-3.5,3.55,channel)
+text2.DrawLatex(-3.5,2.8,"(Assuming SM H decays)")
+text.DrawLatex(3.6,2.45,"#scale[0.9]{#kappa_{#lambda} = 3.5 }")
+text.DrawLatex(-3.8,3.9,warning)
+textlumi.DrawLatex(1.8,3.85,lumi)
+lineHc2ktpos.Draw("same")
+lineTc2ktpos.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+if (chan==1) :
+    cx.SetTextAngle(-88);
+    cx.DrawLatex(3.45,0.8,"#color[12]{50 fb}");
+    cx.SetTextAngle(-88);
+    cx.DrawLatex(4.85,0.88,"#color[12]{100 fb}");
+#print ff15d3p5.Eval(3.0,0.5)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(-93);
+    cx.DrawLatex(4.7,0.85,"#color[12]{20 fb}");
+    cx.SetTextAngle(-93);
+    cx.DrawLatex(3.35,0.85,"#color[12]{10 fb}");
+if (chan==3) :
+    cx.SetTextAngle(-90);
+    cx.DrawLatex(3.45,0.8,"#color[12]{300 fb}");
+    cx.SetTextAngle(-88);
+    cx.DrawLatex(4.45,0.88,"#color[12]{500 fb}");
+#print ff15d3p5.Eval(3.0,0.5)*xs*BR
+# kt axis
+axisc2ktpos.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-4.8,2.3,"#kappa_{t}")
 c3p5.Print(outfolder+"/c2_kt_kl3p5.png")
 c3p5.Close()
 ###############################
 # 2.4
 ###################################
-cm2p4=TCanvas()
+cm2p4=TCanvas("c2","c2",200,50,600,600)
+Histoc2ktm2p4[0].SetNdivisions(0, "Y")
 Histoc2ktm2p4[0].Draw()
-Histoc2kt2p4[0].SetTickLength(0.0, "X")
+Histoc2ktm2p4[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2ktm2p4Exclu[0].Draw("same")
 ff15dm2p4.Draw("same")
@@ -2050,35 +2277,43 @@ for ii in range(1,nclu):
     Histoc2ktm2p4[ii].Draw("same")
     Histoc2ktm2p4Exclu[ii].Draw("same")
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-text3.DrawLatex(-4.5,3.55,channel)
+if (chan==3 or chan ==2) :text3.DrawLatex(-4.5,3.55,channel)
+elif (chan==1) :text3.DrawLatex(-4.7,3.55,channel)
 text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = -2.4")
-text.DrawLatex(-4.45,3.9,warning)
+text.DrawLatex(-4.55,2.45,"#scale[0.9]{#kappa_{#lambda} = -2.4 }")
+text.DrawLatex(-4.8,3.9,warning)
+textlumi.DrawLatex(0.3,3.85,lumi)
 lineHc2kt.Draw("same")
 lineTc2kt.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+if (chan==1) :
+    cx.SetTextAngle(58);
+    cx.DrawLatex(-4.32,0.95,"#color[12]{100 fb}");
+    cx.SetTextAngle(65);
+    cx.DrawLatex(-3.32,0.5,"#color[12]{50 fb}");
+if (chan==2) :
+    cx.SetTextAngle(60);
+    cx.DrawLatex(-3.1,0.65,"#color[12]{10 fb}");
+    cx.SetTextAngle(60);
+    cx.DrawLatex(-4.3,0.85,"#color[12]{20 fb}");
+if (chan==3) :
+    cx.SetTextAngle(65);
+    cx.DrawLatex(-4.32,0.5,"#color[12]{500 fb}");
+    cx.SetTextAngle(65);
+    cx.DrawLatex(-3.32,0.5,"#color[12]{300 fb}");
+#print ff15dm2p4.Eval(-4,0.5)*xs*BR
+axisc2kt.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-5.7,2.3,"#kappa_{t}")
 cm2p4.Print(outfolder+"/c2_kt_klm2p4.png")
 cm2p4.Close()
 ###################################
-c2p4=TCanvas()
+c2p4=TCanvas("c2","c2",200,50,600,600)
+Histoc2kt2p4[0].SetNdivisions(0, "Y")
 Histoc2kt2p4[0].Draw()
-Histoc2kt2p4[0].SetTickLength(0.0, "X")
+Histoc2kt2p4[0].SetTickLength(0.01, "X")
 gPad.Update()
 Histoc2kt2p4Exclu[0].Draw("same")
 ff15d2p4.Draw("same")
@@ -2088,47 +2323,42 @@ for ii in range(1,nclu):
 #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
 text3.DrawLatex(-4.5,3.55,channel)
 text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-text.DrawLatex(-4.55,2.45,"#kappa_{#lambda} = 2.4")
-text.DrawLatex(-4.45,3.9,warning)
+text.DrawLatex(-4.5,2.45,"#scale[0.9]{#kappa_{#lambda} = 2.4 }")
+text.DrawLatex(-4.8,3.9,warning)
+textlumi.DrawLatex(0.3,3.85,lumi)
 lineHc2kt.Draw("same")
 lineTc2kt.Draw("same")
 leg.Draw("same")
 leg2.Draw("same")
 leg3.Draw("same")
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.95,1.14,"#color[12]{150 fb}");
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.9,0.85,"#color[12]{100 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{50 fb}");
-if (chan==5) :
-    cx.SetTextAngle(30);
-    cx.DrawLatex(-3.98,1.36,"#color[12]{30 fb}");
-    cx.SetTextAngle(35);
-    cx.DrawLatex(-3.8,0.5,"#color[12]{20 fb}");
-#print ff15dm15.Eval(-3.8,0.5)*xs*BR
-text2.DrawLatex(-19,1.2,"(Assuming SM H decays)")
+if (chan==1) :
+    cx.SetTextAngle(65);
+    cx.DrawLatex(-4.4,1.65,"#color[12]{100 fb}");
+    cx.SetTextAngle(83);
+    cx.DrawLatex(-3.65,0.5,"#color[12]{50 fb}");
+#print ff15d2p4.Eval(-3.0,1.5)*xs*BR
+if (chan==2) :
+    cx.SetTextAngle(80);
+    cx.DrawLatex(-3.55,0.65,"#color[12]{10 fb}");
+    cx.SetTextAngle(65);
+    cx.DrawLatex(-4.4,1.5,"#color[12]{20 fb}");
+if (chan==3) :
+    cx.SetTextAngle(71);
+    cx.DrawLatex(-4.3,1.3,"#color[12]{500 fb}");
+    cx.SetTextAngle(80);
+    cx.DrawLatex(-3.7,0.5,"#color[12]{300 fb}");
+#    print ff15d2p4.Eval(-3.8,0.5)*xs*BR
+# kt axis
+axisc2kt.Draw()
+text4.SetTextAngle(90)
+text4.DrawLatex(-5.7,2.3,"#kappa_{t}")
 c2p4.Print(outfolder+"/c2_kt_kl2p4.png")
 c2p4.Close()
 ########################
 if(type==2) : 
-  cspread=TCanvas()
-  spread[0].Draw()
-  spread[0].Draw("same")
-  for ii in range(1,nclu): 
-      spread[ii].Draw("same")
-      spread[ii].Draw("same")
-  #text.DrawLatex(-4.1,3.55,"#kappa_{#lambda} = -15 ; c_{g} = c_{2g} = 0")
-  text3.DrawLatex(-4.5,3.55,channel)
-  text2.DrawLatex(-4.5,2.8,"(Assuming SM H decays)")
-  text.DrawLatex(0,1000,", to internal knowlegde")
-  text.DrawLatex(0,200,"to be tunned, it should show the stpread of limits")
-  #lineHc2kt.Draw("same")
-  #lineTc2kt.Draw("same")
-  #leg.Draw("same")
-  #leg2.Draw("same")
-  #leg3.Draw("same")
+  cspread=TCanvas("c2","c2",200,50,600,600)
+  spread.Draw("A*")
+  bench.Draw("same,*")
   cspread.SetLogy(1)
   cspread.Print(outfolder+"/spread.png")
   cspread.Close()
