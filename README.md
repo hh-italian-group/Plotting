@@ -33,9 +33,17 @@ cd ..
 ### How to run
 
 ```shell
+cd HHStatAnalysis
 hh-common-plot --help  # output command line help
-hh-common-plot --config configs/run1_plot.cfg --input Resources/Limits --output plots/run1_plot.pdf --plot hh_common_plot_cms # produce CMS-only Run 1 common plot
-hh-common-plot --config configs/run1_plot.cfg --input Resources/Limits --output plots/run1_plot_lhc.pdf --plot hh_common_plot # produce CMS and ATLAS Run 1 common plot
+hh-common-plot --config Resources/Plots/configs/run2_plot.cfg --input Resources/Limits --output Resources/Plots/Limits/run2_plot_cms_spin0.pdf --plot hh_common_plot_cms_spin0 # produce CMS only spin0 Run II common plot below 1 TeV
+hh-common-plot --config Resources/Plots/configs/run2_plot.cfg --input Resources/Limits --output Resources/Plots/Limits/run2_plot_cms_spin2.pdf --plot hh_common_plot_cms_spin2 # produce CMS only spin2 Run II common plot below 1 TeV
+hh-common-plot --config Resources/Plots/configs/run2_plot.cfg --input Resources/Limits --output Resources/Plots/Limits/run2_plot_cms_extended_spin0.pdf --plot hh_common_plot_cms_extended_spin0  # produce CMS only spin0 Run II common plot below and above 1 TeV
+hh-common-plot --config Resources/Plots/configs/run2_plot.cfg --input Resources/Limits --output Resources/Plots/Limits/run2_plot_cms_extended_spin2.pdf --plot hh_common_plot_cms_extended_spin2  # produce CMS only spin2 Run II common plot below and above 1 TeV
+
+hh-common-plot --config Resources/Plots/configs/run2_plot.cfg --input Resources/Limits --output Resources/Plots/Limits/run2_plot_lhc_spin0.pdf --plot hh_common_plot_lhc_spin0 # produce LHC  spin0 Run II common plot below 1 TeV
+hh-common-plot --config Resources/Plots/configs/run2_plot.cfg --input Resources/Limits --output Resources/Plots/Limits/run2_plot_lhc_spin2.pdf --plot hh_common_plot_lhc_spin2 # produce LHC  spin2 Run II common plot below 1 TeV
+hh-common-plot --config Resources/Plots/configs/run2_plot.cfg --input Resources/Limits --output Resources/Plots/Limits/run2_plot_lhc_extended_spin0.pdf --plot hh_common_plot_lhc_extended_spin0  # produce LHC  spin0 Run II common plot below and above 1 TeV
+hh-common-plot --config Resources/Plots/configs/run2_plot.cfg --input Resources/Limits --output Resources/Plots/Limits/run2_plot_lhc_extended_spin2.pdf --plot hh_common_plot_lhc_extended_spin2  # produce LHC  spin2 Run II common plot below and above 1 Te
 ```
 For standalone installation run *./build/hh-common-plot*.
 
