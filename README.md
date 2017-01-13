@@ -6,13 +6,10 @@
 ### How to install
 
 #### CMSSW-based installation
+Plotting package is installed together with HHStatAnalysis, if the recommended installation procedure is used.
+Here is the recommended way to install only the plotting tools:
 ```shell
-cmsrel CMSSW_7_4_7
-cd CMSSW_7_4_7/src
-cmsenv
-git clone -o upstream git@github.com:cms-hh/Plotting.git HHStatAnalysis/Plotting
-git clone -o upstream git@github.com:cms-hh/Resources.git HHStatAnalysis/Resources
-scram b
+curl -s https://raw.githubusercontent.com/cms-hh/HHStatAnalysis/master/install.sh | bash -s plotting
 ```
 
 #### Prerequisites for standalone installation
@@ -20,8 +17,16 @@ Xcode Command Line Tools (*OS X only*), CERN ROOT, Boost C++ Libraries.
 
 #### Standalone installation
 ```shell
-git clone -o upstream git@github.com:cms-hh/Plotting.git HHStatAnalysis/Plotting
-git clone -o upstream git@github.com:cms-hh/Resources.git HHStatAnalysis/Resources
+mkdir HHStatAnalysis
+cd HHStatAnalysis
+git init
+git remote add cms-hh git@github.com:cms-hh/HHStatAnalysis.git
+git config core.sparsecheckout true
+echo -e "Core/" >> .git/info/sparse-checkout
+git pull cms-hh master
+cd ..
+git clone -o cms-hh git@github.com:cms-hh/Plotting.git HHStatAnalysis/Plotting
+git clone -o cms-hh git@github.com:cms-hh/Resources.git HHStatAnalysis/Resources
 cd HHStatAnalysis
 mkdir build
 cd build

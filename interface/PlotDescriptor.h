@@ -8,7 +8,7 @@ This file is part of https://github.com/cms-hh/Plotting. */
 #include <ostream>
 
 #include "LimitValueCollection.h"
-#include "PlotPrimitives.h"
+#include "HHStatAnalysis/Core/interface/PlotPrimitives.h"
 
 namespace hh_analysis {
 

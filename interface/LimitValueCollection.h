@@ -8,12 +8,12 @@ This file is part of https://github.com/cms-hh/Plotting. */
 #include <list>
 #include <memory>
 #include <TGraph.h>
-#include "EnumNameMap.h"
-#include "PlotPrimitives.h"
+#include "HHStatAnalysis/Core/interface/EnumNameMap.h"
+#include "HHStatAnalysis/Core/interface/PlotPrimitives.h"
 
 namespace hh_analysis {
 
-ENUM_OSTREAM_OPERATOR()
+ENUM_OSTREAM_OPERATORS()
 
 enum class LimitSourceFormat { CombineRootFiles, CombineLogFiles, HepDataTxt, TextTable };
 ENUM_NAMES(LimitSourceFormat) = {

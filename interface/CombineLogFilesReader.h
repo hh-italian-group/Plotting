@@ -5,7 +5,7 @@ This file is part of https://github.com/cms-hh/Plotting. */
 
 #include <fstream>
 #include "LimitSourceReader.h"
-#include "NumericPrimitives.h"
+#include "HHStatAnalysis/Core/interface/NumericPrimitives.h"
 
 namespace hh_analysis {
 
@@ -46,9 +46,9 @@ public:
                         double limit = std::numeric_limits<double>::quiet_NaN();
                         double quantile = -1;
                         if(expected_match_size > 1)
-                            limit = analysis::Parse<double>(match[match.size() - 1]);
+                            limit = analysis::Parse<double, char>(match[match.size() - 1]);
                         if(expected_match_size > 2)
-                            quantile = analysis::Parse<double>(match[match.size() - 2]) / 100;
+                            quantile = analysis::Parse<double, char>(match[match.size() - 2]) / 100;
                         if(!std::isnan(limit)) {
                             const LimitType limit_type = GetLimitType(quantile);
                             desc.limit_values.AddPoint(mass, limit, limit_type);
