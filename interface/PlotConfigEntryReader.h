@@ -3,7 +3,7 @@ This file is part of https://github.com/cms-hh/Plotting. */
 
 #pragma once
 
-#include "ConfigReader.h"
+#include "HHStatAnalysis/Core/interface/ConfigReader.h"
 #include "PlotDescriptor.h"
 
 namespace hh_analysis {

@@ -6,7 +6,7 @@ This file is part of https://github.com/cms-hh/Plotting. */
 #include <list>
 #include <istream>
 #include <ostream>
-#include "PlotPrimitives.h"
+#include "HHStatAnalysis/Core/interface/PlotPrimitives.h"
 #include "LimitValueCollection.h"
 
 namespace hh_analysis {

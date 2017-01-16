@@ -8,7 +8,7 @@ This file is part of https://github.com/cms-hh/Plotting. */
 #include "../interface/LimitSourceReaderFactory.h"
 #include "../interface/LabelConfigEntryReader.h"
 #include "../interface/LegendConfigEntryReader.h"
-#include "../interface/program_main.h"
+#include "HHStatAnalysis/Core/interface/program_main.h"
 
 namespace {
 

@@ -4,9 +4,9 @@ This file is part of https://github.com/cms-hh/Plotting. */
 #pragma once
 
 #include <functional>
-#include "ConfigReader.h"
+#include "HHStatAnalysis/Core/interface/ConfigReader.h"
+#include "HHStatAnalysis/Core/interface/NumericPrimitives.h"
 #include "LimitDescriptor.h"
-#include "NumericPrimitives.h"
 
 namespace hh_analysis {
 

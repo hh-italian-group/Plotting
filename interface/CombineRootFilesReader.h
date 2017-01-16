@@ -5,7 +5,7 @@ This file is part of https://github.com/cms-hh/Plotting. */
 
 #include <cmath>
 #include <TTree.h>
-#include "RootExt.h"
+#include "HHStatAnalysis/Core/interface/RootExt.h"
 #include "LimitSourceReader.h"
 
 namespace hh_analysis {

@@ -5,9 +5,9 @@ This file is part of https://github.com/cms-hh/Plotting. */
 
 #include <fstream>
 #include <boost/algorithm/string.hpp>
+#include "HHStatAnalysis/Core/interface/NumericPrimitives.h"
+#include "HHStatAnalysis/Core/interface/ConfigReader.h"
 #include "LimitSourceReader.h"
-#include "NumericPrimitives.h"
-#include "ConfigReader.h"
 
 namespace hh_analysis {
 
