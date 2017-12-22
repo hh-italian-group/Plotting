@@ -19,7 +19,7 @@ void fixOverlay() {
 }
 */
 
-void setTDRStyle() {
+inline void setTDRStyle() {
   TStyle *tdrStyle = new TStyle("tdrStyle","Style for P-TDR");
 
 // For the canvas:
